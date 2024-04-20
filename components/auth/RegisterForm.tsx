@@ -3,7 +3,7 @@ import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import CardWrapper from './CardWrapper';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoginSchema } from '@/schemas';
+import { LoginSchema, RegisterSchema } from '@/schemas';
 import {
   Form,
   FormControl,
@@ -16,7 +16,7 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { FormError } from '../FormError';
 import { FormSuccess } from '../FormSuccess';
-import { login } from '@/actions/login';
+import { register } from '@/actions/register';
 import { useState, useTransition } from 'react';
 const User = z.object({
   username: z.string(),
@@ -34,25 +34,26 @@ async function test() {
   return 1;
 }
 
-export default function LoginForm() {
+export default function RegisterForm() {
   const [error, setError] = useState<string | undefined>('');
   const [success, setSuccess] = useState<string | undefined>('');
   // startTransition 을 사용하면 revalidate관련 함수를 사용할 때 언제 끝나는지 알 수 있음
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof RegisterSchema>>({
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
       email: '',
       password: '',
+      name: '',
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
     setError('');
     setSuccess('');
     // server action은 프로미스여도 스탈트랜지션이 적용됨
     startTransition(() => {
-      login(values).then((data) => {
+      register(values).then((data) => {
         setError(data.error);
         setSuccess(data.success);
       });
@@ -62,9 +63,9 @@ export default function LoginForm() {
 
   return (
     <CardWrapper
-      headerLabel='Welcome back'
-      backButtonLabel={"Don't hae an account?"}
-      backButtonHref='/auth/register'
+      headerLabel='Create an account'
+      backButtonLabel={'Already have an account?'}
+      backButtonHref='/auth/login'
       showSocial
     >
       <Form {...form}>
@@ -83,6 +84,19 @@ export default function LoginForm() {
                       type='email'
                       disabled={isPending}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            ></FormField>
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder='이름' disabled={isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -110,7 +124,7 @@ export default function LoginForm() {
           <FormError message={error} />
           <FormSuccess message={success} />
           <Button type='submit' className='w-full' disabled={isPending}>
-            Login
+            Create an account
           </Button>
         </form>
       </Form>
