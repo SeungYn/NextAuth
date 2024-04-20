@@ -7,7 +7,7 @@ const font = Poppins({
   subsets: ['latin'],
   weight: ['600'],
 });
-console.log(font);
+//console.log(font);
 export default function Home() {
   return (
     <main
