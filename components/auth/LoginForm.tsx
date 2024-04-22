@@ -53,8 +53,8 @@ export default function LoginForm() {
     // server action은 프로미스여도 스탈트랜지션이 적용됨
     startTransition(() => {
       login(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        // setError(data.error);
+        // setSuccess(data.success);
       });
       //test().then((data) => console.log(data));
     });

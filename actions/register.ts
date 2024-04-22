@@ -3,7 +3,7 @@ import { getUserByEmail } from '@/data/user';
 import { db } from '@/lib/db';
 import { RegisterSchema } from '@/schemas';
 // 서버로 선언한 코드는 클라이언트 번들에 포함되지 않음
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import * as z from 'zod';
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
