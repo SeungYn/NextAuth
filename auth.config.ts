@@ -1,6 +1,7 @@
 // jwt 전략을 사용하도록 하는 미들웨어 엣지에서도 동작함 db에 접근하지 않음
 
 import GitHub from 'next-auth/providers/github';
+import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import type { NextAuthConfig } from 'next-auth';
 import Credentials from '@auth/core/providers/credentials';
@@ -25,6 +26,13 @@ export default {
         return null;
       },
     }),
-    //GitHub,
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    }),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
   ],
 } satisfies NextAuthConfig;

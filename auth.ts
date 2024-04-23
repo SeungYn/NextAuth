@@ -12,8 +12,16 @@ export const {
   signOut,
 } = NextAuth({
   callbacks: {
+    // async signIn({ user }) {
+    //   // db의 user을 가져와줌
+    //   console.log('signin::', user);
+    //   const existingUser = await getUserById(user.id!);
+    //   if (!existingUser || !existingUser.emailVerified) return false;
+
+    //   return true;
+    // },
     async session({ user, session, token }) {
-      console.log('session', { session, user, token });
+      //console.log('session', { session, user, token });
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }
@@ -30,7 +38,7 @@ export const {
       const existingUser = await getUserById(token.sub);
       if (!existingUser) return token;
       token.role = existingUser.role;
-      console.log({ token, user, account, profile, trigger });
+      //console.log({ token, user, account, profile, trigger });
       return token;
     },
   },
