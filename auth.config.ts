@@ -9,6 +9,7 @@ import { LoginSchema } from './schemas';
 import { getUserByEmail } from './data/user';
 
 export default {
+  secret: process.env.AUTH_SECRET,
   providers: [
     Credentials({
       async authorize(cred) {

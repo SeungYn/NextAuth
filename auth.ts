@@ -4,6 +4,7 @@ import { db } from './lib/db';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { getUserById } from './data/user';
 import { UserRole } from '@prisma/client';
+import { KR_TIME_ZONE } from './constant/date';
 
 export const {
   handlers: { GET, POST },
@@ -11,15 +12,25 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/error',
+  },
+  events: {
+    async linkAccount({ user }) {
+      // 사용자가 provider의 계정에 연결할 때 호출되는 메서드
+      // Sent when an account in a given provider is linked to a user in our user database.
+      // For example, when a user signs up with Twitter or when an existing user links their Google account.
+      console.log('linkAccount::', user);
+      await db.user.update({
+        where: {
+          id: user.id,
+        },
+        data: { emailVerified: new Date(new Date().getTime() + KR_TIME_ZONE) },
+      });
+    },
+  },
   callbacks: {
-    // async signIn({ user }) {
-    //   // db의 user을 가져와줌
-    //   console.log('signin::', user);
-    //   const existingUser = await getUserById(user.id!);
-    //   if (!existingUser || !existingUser.emailVerified) return false;
-
-    //   return true;
-    // },
     async session({ user, session, token }) {
       //console.log('session', { session, user, token });
       if (session.user && token.sub) {
@@ -46,3 +57,11 @@ export const {
   session: { strategy: 'jwt' },
   ...authConfig,
 });
+// async signIn({ user }) {
+//   // db의 user을 가져와줌
+//   console.log('signin::', user);
+//   const existingUser = await getUserById(user.id!);
+//   if (!existingUser || !existingUser.emailVerified) return false;
+
+//   return true;
+// },
