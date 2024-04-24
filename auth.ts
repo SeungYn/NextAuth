@@ -21,7 +21,7 @@ export const {
       // 사용자가 provider의 계정에 연결할 때 호출되는 메서드
       // Sent when an account in a given provider is linked to a user in our user database.
       // For example, when a user signs up with Twitter or when an existing user links their Google account.
-      console.log('linkAccount::', user);
+      //console.log('linkAccount::', user);
       await db.user.update({
         where: {
           id: user.id,

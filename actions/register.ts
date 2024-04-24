@@ -1,4 +1,5 @@
 'use server';
+import { sendMail } from '@/data/nodemail';
 import { getUserByEmail } from '@/data/user';
 import { db } from '@/lib/db';
 import { generateVerificationToken } from '@/lib/tokens';
@@ -31,6 +32,12 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   });
 
   const verificationToken = await generateVerificationToken(email);
+  await sendMail({
+    email: verificationToken.email,
+    token: verificationToken.token,
+    message: '이메일 인증하기',
+    subject: '이메일 인증',
+  });
 
   return { success: '계정 생성 완료!' };
 };

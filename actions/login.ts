@@ -1,5 +1,6 @@
 'use server';
 import { signIn } from '@/auth';
+import { sendMail } from '@/data/nodemail';
 import { getUserByEmail } from '@/data/user';
 import { generateVerificationToken } from '@/lib/tokens';
 import { DEFAULT_LOGIN_REDIRECT } from '@/routes';
@@ -22,14 +23,20 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
   if (!existingUser || !existingUser.email || !existingUser.password)
     return { error: '이메일이 존재하지 않습니다!' };
 
-  // if (!existingUser.emailVerified) {
-  //   const verificationToken = await generateVerificationToken(
-  //     existingUser.email
-  //   );
-  //   console.log(verificationToken);
+  if (!existingUser.emailVerified) {
+    const verificationToken = await generateVerificationToken(
+      existingUser.email
+    );
 
-  //   return { success: '발송된 이메일을 확인해주세요!' };
-  // }
+    await sendMail({
+      email: verificationToken.email,
+      token: verificationToken.token,
+      message: '이메일 인증하기',
+      subject: '이메일 인증',
+    });
+
+    return { success: '발송된 이메일을 확인해주세요!' };
+  }
 
   try {
     await signIn('credentials', {

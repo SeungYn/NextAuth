@@ -2,7 +2,7 @@
  * 인증이 필요하지 않는 경로
  * @type {string[]}
  */
-export const publicRoutes = ['/'];
+export const publicRoutes = ['/', '/auth/new-verification'];
 
 export const authRoutes = ['/auth/login', '/auth/register', '/auth/error'];
 
