@@ -31,6 +31,19 @@ export const {
     },
   },
   callbacks: {
+    async signIn({ user, account }) {
+      // Oauth는 로그인을 허락
+      if (account?.provider !== 'credentials') return true;
+
+      const existingUser = await getUserById(user.id!);
+
+      // 이메일 인증이 없으면 로그인 진행 막음
+      if (!existingUser?.emailVerified) return false;
+
+      // TODO: Add 2FA check
+
+      return true;
+    },
     async session({ user, session, token }) {
       //console.log('session', { session, user, token });
       if (session.user && token.sub) {

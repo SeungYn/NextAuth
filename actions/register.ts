@@ -1,6 +1,7 @@
 'use server';
 import { getUserByEmail } from '@/data/user';
 import { db } from '@/lib/db';
+import { generateVerificationToken } from '@/lib/tokens';
 import { RegisterSchema } from '@/schemas';
 // 서버로 선언한 코드는 클라이언트 번들에 포함되지 않음
 import bcrypt from 'bcryptjs';
@@ -28,6 +29,8 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
       password: hashedPassword,
     },
   });
+
+  const verificationToken = await generateVerificationToken(email);
 
   return { success: '계정 생성 완료!' };
 };
