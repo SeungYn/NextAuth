@@ -27,6 +27,32 @@ const transporter = nodemailer.createTransport({
 //   return transporter.sendMail(data);
 // };
 
+export function sendPasswordResetEmail({
+  email,
+  subject,
+  message,
+  token,
+}: {
+  email: string;
+  subject: string;
+  message: string;
+  token?: string;
+}) {
+  const confirmLink = 'http://localhost:3000/auth/new-password?token=' + token;
+  const data = {
+    from: process.env.NODE_MAIL_AUTH,
+    to: email,
+    subject: subject,
+    html: `<h1>${subject}</h1>
+		<div>${message}</div>
+		<p>클릭 <a href="${confirmLink}"> 이메일 인증하기</p>
+		<br/>
+		
+		`,
+  };
+  return transporter.sendMail(data);
+}
+
 export function sendMail({
   email,
   subject,

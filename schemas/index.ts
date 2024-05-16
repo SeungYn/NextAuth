@@ -26,3 +26,9 @@ export const ResetSchema = z.object({
     message: '이메일이 올바르지 않습니다.',
   }),
 });
+
+export const NewPasswordSchema = z.object({
+  password: z.string().min(6, {
+    message: '최소 6글자 이상으로 가능합니다.',
+  }),
+});

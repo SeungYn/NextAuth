@@ -4,7 +4,7 @@ import * as z from 'zod';
 import { getUserByEmail } from '@/data/user';
 import { ResetSchema } from '@/schemas';
 import { generatePasswordResetToken } from '@/lib/tokens';
-import { sendMail } from '@/data/nodemail';
+import { sendMail, sendPasswordResetEmail } from '@/data/nodemail';
 
 export const reset = async (values: z.infer<typeof ResetSchema>) => {
   const validatedFields = ResetSchema.safeParse(values);
@@ -21,9 +21,9 @@ export const reset = async (values: z.infer<typeof ResetSchema>) => {
 
   // TODO: 리셋 이메일 보내기
   const passwordResetToken = await generatePasswordResetToken(email);
-  await sendMail({
+  await sendPasswordResetEmail({
     email: passwordResetToken.email,
-    subject: '유승윤',
+    subject: '비밀번호 초기화 메일',
     token: passwordResetToken.token,
     message: '비밀번호 초기화',
   });
