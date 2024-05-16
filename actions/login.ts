@@ -1,8 +1,16 @@
 'use server';
+
+import { getTwoFactorConfirmationByUserId } from './../data/twoFactorConfirmation';
+
 import { signIn } from '@/auth';
-import { sendMail } from '@/data/nodemail';
+import { sendMail, sendTwoFactorTokenEmail } from '@/data/nodemail';
+import { getTwoFactorTokenByEmail } from '@/data/twoFactorToken';
 import { getUserByEmail } from '@/data/user';
-import { generateVerificationToken } from '@/lib/tokens';
+import { db } from '@/lib/db';
+import {
+  generateTwoFactorToken,
+  generateVerificationToken,
+} from '@/lib/tokens';
 import { DEFAULT_LOGIN_REDIRECT } from '@/routes';
 import { LoginSchema } from '@/schemas';
 import { AuthError } from 'next-auth';
@@ -17,7 +25,8 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return { error: '유효하지 않은 입력값입니다.' };
   }
 
-  const { email, password } = validatedFields.data;
+  const { email, password, code } = validatedFields.data;
+  console.log('code:::', code);
   const existingUser = await getUserByEmail(email);
 
   if (!existingUser || !existingUser.email || !existingUser.password)
@@ -36,6 +45,57 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     });
 
     return { success: '발송된 이메일을 확인해주세요!' };
+  }
+
+  // 2fa 인증 부분 해당 코드를 발송
+  console.log('existingUser:::', existingUser);
+  if (existingUser.isTwoFactorEnabled && existingUser.email) {
+    if (code) {
+      //코드 인증
+      const twoFactorToken = await getTwoFactorTokenByEmail(existingUser.email);
+
+      if (!twoFactorToken) return { error: '유효하지 않는 코드입니다!' };
+
+      if (twoFactorToken.token !== code) {
+        return { error: '유효하지 않는 코드입니다!' };
+      }
+
+      const hasExpired = new Date(twoFactorToken.expires) < new Date();
+      if (hasExpired) {
+        return { error: '코드 인증시간이 만료됐습니다' };
+      }
+
+      await db.twoFactorToken.delete({
+        where: { id: twoFactorToken.id },
+      });
+
+      const existingConfirmation = await getTwoFactorConfirmationByUserId(
+        existingUser.id
+      );
+
+      if (existingConfirmation) {
+        await db.twoFactorConfirmation.delete({
+          where: { id: existingConfirmation.id },
+        });
+      }
+
+      await db.twoFactorConfirmation.create({
+        data: {
+          userId: existingUser.id,
+        },
+      });
+    } else {
+      const twoFactorToken = await generateTwoFactorToken(existingUser.email);
+
+      await sendTwoFactorTokenEmail({
+        email: existingUser.email,
+        token: twoFactorToken.token,
+        subject: '2FA 인증',
+        message: twoFactorToken.token,
+      });
+
+      return { twoFactor: true };
+    }
   }
 
   try {

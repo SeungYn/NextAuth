@@ -7,6 +7,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import { getUserById } from './data/user';
 import { UserRole } from '@prisma/client';
 import { KR_TIME_ZONE } from './constant/date';
+import { getTwoFactorConfirmationByUserId } from './data/twoFactorConfirmation';
 
 export const {
   handlers: { GET, POST },
@@ -16,6 +17,7 @@ export const {
 } = NextAuth({
   pages: {
     signIn: '/auth/login',
+    signOut: '/auth/login',
     error: '/auth/error',
   },
   events: {
@@ -43,6 +45,19 @@ export const {
       if (!existingUser?.emailVerified) return false;
 
       // TODO: Add 2FA check
+      if (!existingUser?.isTwoFactorEnabled) return false;
+      if (existingUser.isTwoFactorEnabled) {
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
+          existingUser.id
+        );
+
+        if (!twoFactorConfirmation) return false;
+
+        // delete two factor confirmation for next sign in
+        await db.twoFactorConfirmation.delete({
+          where: { id: twoFactorConfirmation.id },
+        });
+      }
 
       return true;
     },
