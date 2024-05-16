@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { string } from 'zod';
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -9,6 +10,22 @@ const transporter = nodemailer.createTransport({
     pass: process.env.NODE_MAIL_PASS,
   },
 });
+
+// export const sendPasswordResetEmail = async (email: string, token: string) => {
+//   const confirmLink = 'http://localhost:3000/auth/new-password?token=' + token;
+//   const data = {
+//     from: process.env.NODE_MAIL_AUTH,
+//     to: email,
+//     subject: subject,
+//     html: `<h1>${subject}</h1>
+// 		<div>${message}</div>
+// 		<p>클릭 <a href="${confirmLink}"> 이메일 인증하기</p>
+// 		<br/>
+
+// 		`,
+//   };
+//   return transporter.sendMail(data);
+// };
 
 export function sendMail({
   email,

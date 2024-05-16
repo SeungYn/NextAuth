@@ -17,9 +17,10 @@ export default function NewVerificationForm({ token }: { token: string }) {
       setError('토큰이 없습니다!');
       return;
     }
+    // useEffect 개발자 모드에서는 두번씩 호출되므로 주의!!
     newVerification(token)
       .then((data) => {
-        console.log(123, data);
+        console.log('안녕하세요', data);
         setSuccess(data.success);
         setError(data.error);
       })

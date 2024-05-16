@@ -20,3 +20,9 @@ export const RegisterSchema = z.object({
     message: '이름은 필수입니다.',
   }),
 });
+
+export const ResetSchema = z.object({
+  email: z.string().email({
+    message: '이메일이 올바르지 않습니다.',
+  }),
+});

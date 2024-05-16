@@ -3,7 +3,7 @@ import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import CardWrapper from './CardWrapper';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoginSchema } from '@/schemas';
+import { ResetSchema } from '@/schemas';
 import {
   Form,
   FormControl,
@@ -16,10 +16,9 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { FormError } from '../FormError';
 import { FormSuccess } from '../FormSuccess';
-import { login } from '@/actions/login';
 import { useState, useTransition } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { reset } from '@/actions/reset';
+
 const User = z.object({
   username: z.string(),
 });
@@ -36,31 +35,25 @@ async function test() {
   return 1;
 }
 
-export default function LoginForm() {
-  const searchParams = useSearchParams();
-  const urlError =
-    searchParams.get('error') === 'OAuthAccountNotLinked'
-      ? '이메일은 이미 사용중입니다!'
-      : '';
-
+export default function ResetForm() {
   const [error, setError] = useState<string | undefined>('');
   const [success, setSuccess] = useState<string | undefined>('');
   // startTransition 을 사용하면 revalidate관련 함수를 사용할 때 언제 끝나는지 알 수 있음
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof ResetSchema>>({
+    resolver: zodResolver(ResetSchema),
     defaultValues: {
       email: '',
-      password: '',
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof ResetSchema>) => {
     setError('');
     setSuccess('');
+
     // server action은 프로미스여도 스탈트랜지션이 적용됨
     startTransition(() => {
-      login(values).then((data) => {
+      reset(values).then((data) => {
         setError(data?.error);
         setSuccess(data?.success);
         console.log(data);
@@ -71,10 +64,9 @@ export default function LoginForm() {
 
   return (
     <CardWrapper
-      headerLabel='Welcome back'
-      backButtonLabel={"Don't hae an account?"}
-      backButtonHref='/auth/register'
-      showSocial
+      headerLabel='비밀번호를 잊으셨나요?'
+      backButtonLabel='로그인으로 이동'
+      backButtonHref='/auth/login'
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
@@ -97,37 +89,11 @@ export default function LoginForm() {
                 </FormItem>
               )}
             ></FormField>
-            <FormField
-              control={form.control}
-              name='password'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder='****'
-                      type='password'
-                      disabled={isPending}
-                    />
-                  </FormControl>
-                  <Button
-                    size='sm'
-                    variant='link'
-                    asChild
-                    className='px-0 font-nonal'
-                  >
-                    <Link href='/auth/reset'>Forgot Password?</Link>
-                  </Button>
-                  <FormMessage />
-                </FormItem>
-              )}
-            ></FormField>
           </div>
-          <FormError message={error || urlError} />
+          <FormError message={error} />
           <FormSuccess message={success} />
           <Button type='submit' className='w-full' disabled={isPending}>
-            Login
+            리셋 이메일 보내기
           </Button>
         </form>
       </Form>

@@ -1,3 +1,5 @@
+// edge에서 프리즈마 어댑터는 사용 안되니 분리
+
 import NextAuth, { DefaultSession } from 'next-auth';
 import authConfig from './auth.config';
 import { db } from './lib/db';
