@@ -19,8 +19,7 @@ import * as z from 'zod';
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
   const validatedFields = LoginSchema.safeParse(values);
-  console.log(values);
-  await new Promise((rev) => setTimeout(rev, 5000));
+  console.group('login-server-action');
   if (!validatedFields.success) {
     return { error: '유효하지 않은 입력값입니다.' };
   }
@@ -53,7 +52,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     if (code) {
       //코드 인증
       const twoFactorToken = await getTwoFactorTokenByEmail(existingUser.email);
-
+      console.log('twoFactorToken::: ', twoFactorToken);
       if (!twoFactorToken) return { error: '유효하지 않는 코드입니다!' };
 
       if (twoFactorToken.token !== code) {
@@ -97,8 +96,10 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
       return { twoFactor: true };
     }
   }
+  console.groupEnd();
 
   try {
+    console.log('-----authjs sign!!!------');
     await signIn('credentials', {
       email,
       password,

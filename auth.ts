@@ -17,7 +17,6 @@ export const {
 } = NextAuth({
   pages: {
     signIn: '/auth/login',
-    signOut: '/auth/login',
     error: '/auth/error',
   },
   events: {
@@ -37,20 +36,22 @@ export const {
   callbacks: {
     async signIn({ user, account }) {
       // Oauth는 로그인을 허락
+      console.group('auth-signin-callback');
+      console.log(user);
       if (account?.provider !== 'credentials') return true;
 
       const existingUser = await getUserById(user.id!);
 
       // 이메일 인증이 없으면 로그인 진행 막음
       if (!existingUser?.emailVerified) return false;
-
+      console.log('existingUser:::auth.ts', existingUser);
       // TODO: Add 2FA check
       if (!existingUser?.isTwoFactorEnabled) return false;
       if (existingUser.isTwoFactorEnabled) {
         const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
           existingUser.id
         );
-
+        console.log('twoFactorConfirmation:::', twoFactorConfirmation);
         if (!twoFactorConfirmation) return false;
 
         // delete two factor confirmation for next sign in
@@ -58,7 +59,7 @@ export const {
           where: { id: twoFactorConfirmation.id },
         });
       }
-
+      console.groupEnd();
       return true;
     },
     async session({ user, session, token }) {

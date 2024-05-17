@@ -55,7 +55,6 @@ export default function LoginForm() {
       code: '',
     },
   });
-  console.log('login form');
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
     console.log('login submit');
     setError('');
@@ -165,7 +164,14 @@ export default function LoginForm() {
           </div>
           <FormError message={error || urlError} />
           <FormSuccess message={success} />
-          <Button type='submit' className='w-full' disabled={isPending}>
+          <Button
+            type='submit'
+            className='w-full'
+            disabled={isPending}
+            onClick={() => {
+              console.log('button click');
+            }}
+          >
             {showTwoFactor ? '인증하기' : '로그인'}
           </Button>
         </form>
