@@ -46,7 +46,7 @@ export const {
       if (!existingUser?.emailVerified) return false;
       console.log('existingUser:::auth.ts', existingUser);
       // TODO: Add 2FA check
-      if (!existingUser?.isTwoFactorEnabled) return false;
+      //if (!existingUser?.isTwoFactorEnabled) return false;
       if (existingUser.isTwoFactorEnabled) {
         const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
           existingUser.id
@@ -71,6 +71,11 @@ export const {
       if (session.user && token.role) {
         session.user.role = token.role as UserRole;
       }
+
+      if (session.user) {
+        session.user.isTwoFactor = token.isTwoFactor as boolean;
+      }
+
       return session;
     },
     async jwt({ token, user, account, profile, trigger }) {
@@ -80,6 +85,7 @@ export const {
       const existingUser = await getUserById(token.sub);
       if (!existingUser) return token;
       token.role = existingUser.role;
+      token.isTwoFactor = existingUser.isTwoFactorEnabled;
       //console.log({ token, user, account, profile, trigger });
       return token;
     },
